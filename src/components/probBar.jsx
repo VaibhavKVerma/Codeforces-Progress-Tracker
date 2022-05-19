@@ -38,7 +38,13 @@ class BarProblems extends Component {
 
   render() {
     return (
-      <div style={{ position: "relative", height: "30vh", width: "50vw" }}>
+      <div
+        style={{
+          position: "relative",
+          height: this.props.height ? this.props.height : "30vh",
+          width: this.props.width ? this.props.width : "50vw",
+        }}
+      >
         <Bar data={this.filterData()} options={options} />
       </div>
     );
