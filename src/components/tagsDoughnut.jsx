@@ -1,15 +1,9 @@
 import React, { Component } from "react";
 import { Doughnut } from "react-chartjs-2";
 
-const options = {
-  legend: {
-    position: "right"
-  }
-};
-
 class DoughnutTags extends Component {
   state = {
-    data: []
+    data: [],
   };
 
   filterData = () => {
@@ -61,7 +55,7 @@ class DoughnutTags extends Component {
           "#827717",
           "#3F51B5",
           "#8BC34A",
-          "#F2317A"
+          "#F2317A",
         ],
         hoverBackgroundColor: [
           "#FF6384",
@@ -71,17 +65,32 @@ class DoughnutTags extends Component {
           "#4682B4",
           "#00FFFF",
           "#0099FF",
-          "#3E3BF5"
-        ]
-      }
+          "#3E3BF5",
+        ],
+      },
     ];
     return data;
   };
 
   render() {
+    console.log(this.props);
     return (
-      <div style={{ position: "relative", height: "30vh", width: "50vw" }}>
-        <Doughnut data={this.filterData()} options={options} />
+      <div
+        style={{
+          position: "relative",
+          height: "30vh",
+          width: this.props.width ? this.props.width : "50vw",
+        }}
+      >
+        <Doughnut
+          data={this.filterData()}
+          options={{
+            legend: {
+              position: "right",
+              display: this.props.display,
+            },
+          }}
+        />
       </div>
     );
   }
