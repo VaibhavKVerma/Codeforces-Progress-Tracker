@@ -388,7 +388,6 @@ body {
   border: none;
   background: rgb(255, 255, 255);
   color: white;
-  /* text-shadow: 0 0 10px rgb(143, 136, 136); */
   padding: 0 80px 0 20px;
   border-radius: 30px;
   box-shadow: 0 0 25px 0 rgb(102, 98, 98), 0 20px 25px 0 rgba(0, 0, 0, 0.2);
@@ -450,4 +449,13 @@ body {
 
 .above {
   margin-bottom: 115px;
+}
+.form-inline {
+  display: flex;
+}
+
+.search {
+  background-color: black;
+  color: white;
+  border-radius: 10%;
 }
