@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import "./App.css";
 import { Route, Switch, Redirect } from "react-router-dom";
 import Home from "./components/home";
 import Table from "./components/table";
@@ -25,6 +24,27 @@ class GetHandle extends Component {
     show: false,
     otherRoutes: false,
     searchedBefore: false,
+    suser: "",
+    suserName: "",
+    ssubmissions: [],
+    scontests: [],
+    suserInfo: [],
+    data: "",
+  };
+
+  //For comparison
+  secondUserData = async () => {
+    try {
+      const rData = await request(this.state.suser);
+      this.setState({
+        ssubmissions: rData[0],
+        scontests: rData[1],
+        suserInfo: rData[2],
+        suserName: this.state.suser,
+      });
+    } catch (ex) {
+      toast.error(`Invalid Username : ${this.state.suser}`);
+    }
   };
 
   // For Bar chart
@@ -48,17 +68,15 @@ class GetHandle extends Component {
   };
 
   // For Bar chart
-  probIndex = () => {
-    const submissions = this.state.submissions.filter(
-      (c) => c.verdict === "OK"
-    );
+  probIndex = (data) => {
+    const submissions = data.filter((c) => c.verdict === "OK");
     const pindex = submissions.map((p) => p.problem.index);
     let counts = {};
     for (let i = 0; i < pindex.length; i++) {
       let num = pindex[i];
       counts[num] = counts[num] ? counts[num] + 1 : 1;
     }
-    console.log(counts);
+    // console.log(counts);
     return counts;
   };
 
@@ -98,8 +116,8 @@ class GetHandle extends Component {
     return unsolvedmap;
   };
 
-  probRatings = () => {
-    const submissions = this.state.submissions;
+  probRatings = (data) => {
+    const submissions = data;
     const solved = new Map();
     for (const itr of submissions) {
       if (itr.verdict === "OK") {
@@ -118,8 +136,8 @@ class GetHandle extends Component {
     return arr;
   };
   // Tags for Doughnut
-  programtags = () => {
-    let tags = this.state.submissions.map((p) => p.problem.tags);
+  programtags = (data) => {
+    let tags = data.map((p) => p.problem.tags);
     tags = [].concat.apply([], tags);
     let counts = {};
     for (let i = 0; i < tags.length; i++) {
@@ -153,10 +171,49 @@ class GetHandle extends Component {
     }
   }
 
+  componentDidUpdate(properties, prevprops) {
+    if (this.state.suserName !== prevprops.suserName) {
+      this.setState({
+        data: (
+          <div>
+            <Table
+              user={this.state.suserName}
+              submissions={this.state.ssubmissions}
+              contests={this.state.scontests}
+              userInfo={this.state.suserInfo}
+            />
+            <div>
+              <BarProblems
+                data={this.probIndex(this.state.ssubmissions)}
+                height={"100%"}
+                width={"40vw"}
+              />
+            </div>
+            <div>
+              <BarProblems
+                data={this.probRatings(this.state.ssubmissions)}
+                height={"100%"}
+                width={"40vw"}
+              />
+            </div>
+            <div>
+              <DoughnutTags
+                data={this.programtags(this.state.ssubmissions)}
+                display={false}
+                width={"100%"}
+              />
+            </div>
+          </div>
+        ),
+      });
+    }
+  }
+
   onSubmit = async () => {
     this.setState({ show: true });
     try {
       const rData = await request(this.state.tuser);
+      console.log(rData);
       this.setState({
         submissions: rData[0],
         contests: rData[1],
@@ -166,17 +223,14 @@ class GetHandle extends Component {
         otherRoutes: true,
       });
 
-      // Store current state in local storage so that it can be fetched
-      // even after the page is reloaded.
-      sessionStorage.setItem("submissions", JSON.stringify(rData[0]));
-      sessionStorage.setItem("contests", JSON.stringify(rData[1]));
-      sessionStorage.setItem("userInfo", JSON.stringify(rData[2]));
-      sessionStorage.setItem("userName", this.state.tuser);
-      sessionStorage.setItem("show", "false");
-      sessionStorage.setItem("otherRoutes", "true");
-      sessionStorage.setItem("searchedBefore", "true");
-      this.setState({ searchedBefore: true });
-      // console.log(this.state);
+      // sessionStorage.setItem("submissions", JSON.stringify(rData[0]));
+      // sessionStorage.setItem("contests", JSON.stringify(rData[1]));
+      // sessionStorage.setItem("userInfo", JSON.stringify(rData[2]));
+      // sessionStorage.setItem("userName", this.state.tuser);
+      // sessionStorage.setItem("show", "false");
+      // sessionStorage.setItem("otherRoutes", "true");
+      // sessionStorage.setItem("searchedBefore", "true");
+      // this.setState({ searchedBefore: true });
     } catch (ex) {
       this.setState({ show: false });
       toast.error(`Invalid Username : ${this.state.tuser}`);
@@ -185,7 +239,67 @@ class GetHandle extends Component {
 
   otherRoutes = () => {
     if (this.props.location.pathname === "/") return null;
+    if (this.props.location.pathname === "/compare") {
+      return (
+        <div style={{ display: "flex" }}>
+          <div
+            className="col-md-4 col-xs-12 alig"
+            style={{ flex: "5", marginTop: "38px" }}
+          >
+            <Table
+              user={this.state.userName}
+              submissions={this.state.submissions}
+              contests={this.state.contests}
+              userInfo={this.state.userInfo}
+            />
+            <div>
+              <BarProblems
+                data={this.probIndex(this.state.submissions)}
+                height={"100%"}
+                width={"40vw"}
+              />
+            </div>
+            <div>
+              <BarProblems
+                data={this.probRatings(this.state.submissions)}
+                height={"100%"}
+                width={"40vw"}
+              />
+            </div>
+            <div>
+              <DoughnutTags
+                data={this.programtags(this.state.submissions)}
+                display={false}
+                width={"100%"}
+              />
+            </div>
+          </div>
+          <div style={{ flex: "5" }}>
+            <div style={{ display: "flex" }}>
+              <input
+                className="form-control mr-sm-2"
+                type="search"
+                placeholder="Search username"
+                onChange={(e) =>
+                  this.setState({ suser: e.currentTarget.value })
+                }
+              />
+              <button
+                className="search btn my-2 my-sm-0"
+                onClick={() => {
+                  this.secondUserData();
+                }}
+              >
+                Search
+              </button>
+            </div>
+            {this.state.data}
+          </div>
+        </div>
+      );
+    }
     if (!this.state.otherRoutes) return null;
+    console.log(this.state);
     return (
       <div className="row above">
         <div className="col-md-4 col-xs-12 alig">
@@ -207,7 +321,9 @@ class GetHandle extends Component {
             <Route
               exact
               path="/category"
-              render={() => <BarProblems data={this.probIndex()} />}
+              render={() => (
+                <BarProblems data={this.probIndex(this.state.submissions)} />
+              )}
             />
             <Route
               exact
@@ -217,7 +333,12 @@ class GetHandle extends Component {
             <Route
               exact
               path="/tags"
-              render={() => <DoughnutTags data={this.programtags()} />}
+              render={() => (
+                <DoughnutTags
+                  data={this.programtags(this.state.submissions)}
+                  display={true}
+                />
+              )}
             />
             <Route
               exact
@@ -227,7 +348,9 @@ class GetHandle extends Component {
             <Route
               exact
               path="/ratings"
-              render={() => <BarProblems data={this.probRatings()} />}
+              render={() => (
+                <BarProblems data={this.probRatings(this.state.submissions)} />
+              )}
             />
           </Switch>
         </div>
@@ -244,9 +367,9 @@ class GetHandle extends Component {
   };
 
   renderNavBar = () => {
-    if (this.state.otherRoutes && !(this.props.location.pathname === "/"))
+    if (this.state.otherRoutes && !(this.props.location.pathname === "/")) {
       return <NavBar onChange={this.onChange} onSubmit={this.onSubmit} />;
-    else
+    } else
       return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
           <a className="navbar-brand" href="/">
