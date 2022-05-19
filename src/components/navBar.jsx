@@ -24,7 +24,7 @@ const NavBar = (props) => {
       </button>
       <div className="collapse navbar-collapse" id="navbarTogglerDemo02">
         <form
-          className="form-inline my-2 my-lg-0"
+          className="form-inline my-2 my-lg-0 flex"
           onSubmit={onClickPreventDefault}
         >
           <input
@@ -37,12 +37,17 @@ const NavBar = (props) => {
             <button
               className="btn btn-outline-light my-2 my-sm-0"
               type="submit"
-              onClick={props.onSubmit}
+              onClick={() => props.onSubmit}
             >
               Search
             </button>
           </Link>
         </form>
+        <Link to="/compare" style={{ float: "right" }}>
+          <button className="btn btn-outline-light my-2 my-sm-0" type="submit">
+            Compare
+          </button>
+        </Link>
       </div>
     </nav>
   );
